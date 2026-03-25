@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Search, ChevronLeft, ChevronRight, Film } from "lucide-react";
-import { useMovies } from "@/modules/movies/hooks/useMovies";
+import { useRestaurants } from "@/modules/movies/hooks/useRestaurants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ResView } from "./ResView";
-const MoviesView = () => {
+const RestaurantView = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(
@@ -15,23 +15,28 @@ const MoviesView = () => {
 
   const page = Number(searchParams.get("page") ?? "1");
   const search = searchParams.get("search") ?? "";
-  const selectedGenre = searchParams.get("genre") ?? "";
+  const selectedGenre = searchParams.get("cuisine") ?? "";
 
-  const { data, isLoading, isError, refetch } = useMovies({
+  const { data, isLoading, isError, refetch } = useRestaurants({
     page,
     limit: 20,
     search: search || undefined,
     cuisine: selectedGenre || undefined,
   });
 
-  const movies = data?.restaurant ?? [];
+  const restaurants = data?.restaurant ?? [];
   const totalPages = data?.totalPages ?? 1;
   const total = data?.total ?? 0;
 
   const handleSearch = (e: { preventDefault(): void }) => {
     e.preventDefault();
-    setSearchParams({ search: searchInput, page: "1" });
+    setSearchParams({
+      search: searchInput,
+      cuisine: selectedGenre,
+      page: "1",
+    });
   };
+  console.log({ search, selectedGenre });
 
   return (
     <div className="p-4">
@@ -55,16 +60,16 @@ const MoviesView = () => {
         <div className="text-red-500">Failed to load restaurants.</div>
       )}
 
-      {!isLoading && movies.length === 0 && (
+      {!isLoading && restaurants.length === 0 && (
         <div>No restaurants found. Try adjusting your search?</div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {movies.map((res) => (
+        {restaurants.map((res) => (
           <ResView
             key={res._id}
             res={res}
-            onClick={() => navigate(`/movies/${res._id}`)}
+            onClick={() => navigate(`/restaurants/${res._id}`)}
           />
         ))}
       </div>
@@ -106,4 +111,4 @@ const MoviesView = () => {
   );
 };
 
-export { MoviesView };
+export { RestaurantView };
